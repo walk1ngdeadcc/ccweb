@@ -9,3 +9,10 @@ Thumbs.db
 
 # 不需要部署的文件
 README.md
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
