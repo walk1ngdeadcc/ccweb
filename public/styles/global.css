@@ -312,8 +312,255 @@ html.light :not(pre) > code {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .crt-flicker {
     animation: none;
+  }
+}
+
+/* ========== ProfileCard 个人卡片 ========== */
+.profile-blur-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.profile-avatar-small {
+  position: fixed;
+  top: 14px;
+  left: 20px;
+  z-index: 210;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 12px rgba(16, 163, 127, 0.3);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+}
+
+.profile-avatar-small.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.profile-avatar-small:hover {
+  box-shadow: 0 0 20px rgba(16, 163, 127, 0.5);
+}
+
+.profile-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-card-wrapper {
+  position: fixed;
+  z-index: 205;
+  perspective: 1200px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.profile-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.profile-card-front,
+.profile-card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.profile-card-front {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px 20px;
+  overflow: hidden;
+}
+
+.profile-card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(16, 163, 127, 0.08) 60deg,
+    transparent 120deg,
+    rgba(124, 58, 237, 0.06) 180deg,
+    transparent 240deg,
+    rgba(16, 163, 127, 0.08) 300deg,
+    transparent 360deg
+  );
+  animation: glow-rotate 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes glow-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary);
+  box-shadow: 0 0 24px rgba(16, 163, 127, 0.3);
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-card-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-card-bio {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border-radius: 12px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 20px;
+}
+
+.profile-enter-btn:hover {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: 0 0 20px rgba(16, 163, 127, 0.3);
+}
+
+.profile-social-links {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.profile-social-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary);
+  border-color: rgba(16, 163, 127, 0.3);
+}
+
+.profile-card-back {
+  transform: rotateY(180deg);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card-back img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+
+.profile-card-front,
+.profile-card-back {
+  transition: opacity 0.35s ease;
+}
+
+.profile-card-inner.flipped .profile-card-front {
+  opacity: 0;
+}
+
+.profile-card-inner.flipped .profile-card-back {
+  opacity: 1;
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .profile-avatar-small {
+    top: 10px;
+    left: 12px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-card-inner {
+    width: 280px;
+    height: 340px;
+  }
+
+  .profile-card-front {
+    padding: 24px 18px 16px;
+  }
+
+  .profile-avatar-large {
+    width: 64px;
+    height: 64px;
   }
 }

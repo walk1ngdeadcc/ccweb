@@ -1,4 +1,6 @@
 ---
+import ProfileCard from './ProfileCard.astro';
+
 interface Props {
   current?: string;
 }
@@ -15,14 +17,13 @@ const navItems = [
   { href: '/about', label: '关于', id: 'about' },
 ];
 ---
+<ProfileCard />
+
 <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="siteHeader">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="flex items-center justify-between h-14 sm:h-16">
-      <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 text-primary font-bold text-lg tracking-tight hover:opacity-80 transition-opacity">
-        <span class="text-xl">🧑‍💻</span>
-        <span class="hidden sm:inline">ZeroOne Notes</span>
-      </a>
+      <!-- Logo placeholder - avatar will appear here via ProfileCard -->
+      <div class="w-10"></div>
       
       <!-- Desktop Nav -->
       <nav class="hidden md:flex items-center gap-1">
@@ -95,7 +96,7 @@ const navItems = [
   const sunIcon = document.getElementById('sunIcon');
   const moonIcon = document.getElementById('moonIcon');
   const html = document.documentElement;
-  
+
   function updateThemeIcons() {
     const isLight = html.classList.contains('light');
     if (sunIcon && moonIcon) {
@@ -103,28 +104,28 @@ const navItems = [
       moonIcon.classList.toggle('hidden', isLight);
     }
   }
-  
+
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'light') {
     html.classList.add('light');
   }
   updateThemeIcons();
-  
+
   themeToggle?.addEventListener('click', () => {
     html.classList.toggle('light');
     const isLight = html.classList.contains('light');
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
     updateThemeIcons();
   });
-  
+
   // 移动菜单
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const mobileMenu = document.getElementById('mobileMenu');
-  
+
   mobileMenuBtn?.addEventListener('click', () => {
     mobileMenu?.classList.toggle('hidden');
   });
-  
+
   // 滚动时头部样式
   const header = document.getElementById('siteHeader');
   window.addEventListener('scroll', () => {
@@ -133,6 +134,227 @@ const navItems = [
     } else {
       header?.classList.remove('bg-page-bg/80', 'backdrop-blur-xl', 'border-b', 'border-white/5');
     }
+  });
+
+  // ========== ProfileCard 逻辑 ==========
+  const card = document.getElementById('profileCard');
+  const cardInner = document.getElementById('profileCardInner');
+  const blurOverlay = document.getElementById('profileBlur');
+  const avatarSmall = document.getElementById('profileAvatarSmall');
+  const enterBtn = document.getElementById('profileEnterBtn');
+
+  if (!card || !cardInner || !blurOverlay || !avatarSmall) return;
+
+  const CW = 320, CH = 380; // 卡片尺寸
+  const DURATION = 600;
+  let isExpanded = true;
+  let isAnimating = false;
+
+  // 获取居中坐标
+  function getCenterPos() {
+    return {
+      left: (window.innerWidth - CW) / 2,
+      top: (window.innerHeight - CH) / 2
+    };
+  }
+
+  // 设置卡片为居中展开态
+  function setExpanded() {
+    const c = getCenterPos();
+    card.style.position = 'fixed';
+    card.style.left = c.left + 'px';
+    card.style.top = c.top + 'px';
+    card.style.width = CW + 'px';
+    card.style.height = CH + 'px';
+    card.style.opacity = '1';
+    card.style.pointerEvents = 'auto';
+    card.style.borderRadius = '24px';
+    cardInner.classList.remove('flipped');
+    cardInner.style.transform = '';
+    cardInner.style.transition = 'none';
+  }
+
+  // 开机后显示卡片（居中 + 遮罩）
+  const bootScreen = document.getElementById('bootScreen');
+  function showCard() {
+    if (sessionStorage.getItem('profile_card_closed')) {
+      avatarSmall.classList.add('visible');
+      card.style.opacity = '0';
+      card.style.pointerEvents = 'none';
+      isExpanded = false;
+      return;
+    }
+    setExpanded();
+    blurOverlay.style.transition = 'opacity 0.4s ease';
+    blurOverlay.style.opacity = '1';
+  }
+
+  if (bootScreen) {
+    if (bootScreen.style.display === 'none' || sessionStorage.getItem('zeroone_booted')) {
+      showCard();
+    } else {
+      const observer = new MutationObserver(() => {
+        if (bootScreen.style.display === 'none') {
+          showCard();
+          observer.disconnect();
+        }
+      });
+      observer.observe(bootScreen, { attributes: true, attributeFilter: ['style'] });
+    }
+  } else {
+    showCard();
+  }
+
+  // 收缩到左上角头像
+  function animateCardToAvatar() {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    const avatarRect = avatarSmall.getBoundingClientRect();
+
+    // 翻转动画（移到 cardInner，避免与 card 的位置动画冲突）
+    cardInner.style.transition = `transform ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+    cardInner.classList.add('flipped');
+    cardInner.style.transform = 'rotateY(180deg)';
+
+    // 卡片外观动画
+    card.style.transition = [
+      `left ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `top ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `width ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `height ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `opacity ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `border-radius ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+    ].join(', ');
+
+    card.offsetHeight; // 强制回流
+
+    // 动画到小头像位置
+    card.style.left = avatarRect.left + 'px';
+    card.style.top = avatarRect.top + 'px';
+    card.style.width = avatarRect.width + 'px';
+    card.style.height = avatarRect.height + 'px';
+    card.style.borderRadius = '50%';
+    card.style.opacity = '0';
+
+    // 遮罩同步淡出
+    blurOverlay.style.transition = `opacity ${DURATION}ms ease`;
+    blurOverlay.style.opacity = '0';
+
+    setTimeout(() => {
+      card.style.transition = 'none';
+      card.style.pointerEvents = 'none';
+      card.style.borderRadius = '';
+      cardInner.style.transition = 'none';
+      cardInner.style.transform = '';
+      cardInner.classList.remove('flipped');
+      avatarSmall.classList.add('visible');
+      isExpanded = false;
+      isAnimating = false;
+      sessionStorage.setItem('profile_card_closed', 'true');
+    }, DURATION);
+  }
+
+  // 从左上角头像展开到居中
+  function animateAvatarToCard() {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    avatarSmall.classList.remove('visible');
+    const avatarRect = avatarSmall.getBoundingClientRect();
+    const center = getCenterPos();
+
+    // 初始状态：小头像位置，背面朝前，完全透明
+    card.style.transition = 'none';
+    card.style.position = 'fixed';
+    card.style.left = avatarRect.left + 'px';
+    card.style.top = avatarRect.top + 'px';
+    card.style.width = avatarRect.width + 'px';
+    card.style.height = avatarRect.height + 'px';
+    card.style.borderRadius = '50%';
+    card.style.opacity = '0';
+    card.style.pointerEvents = 'auto';
+
+    cardInner.style.transition = 'none';
+    cardInner.classList.add('flipped');
+    cardInner.style.transform = 'rotateY(180deg)';
+
+    card.offsetHeight; // 强制回流
+
+    // 同步启动所有动画
+    card.style.transition = [
+      `left ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `top ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `width ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `height ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `opacity ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `border-radius ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+    ].join(', ');
+
+    cardInner.style.transition = `transform ${DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+
+    card.style.left = center.left + 'px';
+    card.style.top = center.top + 'px';
+    card.style.width = CW + 'px';
+    card.style.height = CH + 'px';
+    card.style.borderRadius = '24px';
+    card.style.opacity = '1';
+
+    // 遮罩同步淡入
+    blurOverlay.style.transition = `opacity ${DURATION}ms ease`;
+    blurOverlay.style.opacity = '1';
+
+    // 翻回正面
+    cardInner.classList.remove('flipped');
+    cardInner.style.transform = 'rotateY(0deg)';
+
+    setTimeout(() => {
+      card.style.transition = 'none';
+      card.style.borderRadius = '';
+      cardInner.style.transition = 'none';
+      cardInner.style.transform = '';
+      isExpanded = true;
+      isAnimating = false;
+    }, DURATION);
+  }
+
+  // 点击小头像 → 展开卡片
+  avatarSmall.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!isExpanded) {
+      animateAvatarToCard();
+    }
+  });
+
+  // hover 小头像 → 展开卡片
+  avatarSmall.addEventListener('mouseenter', function(e) {
+    e.stopPropagation();
+    if (!isExpanded && !isAnimating) {
+      animateAvatarToCard();
+    }
+  });
+
+  // 鼠标移出卡片区域 → 收缩卡片
+  card.addEventListener('mouseleave', function(e) {
+    if (isExpanded && !isAnimating) {
+      animateCardToAvatar();
+    }
+  });
+
+  // 点击进入按钮 → 隐藏卡片
+  enterBtn?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (isExpanded) {
+      animateCardToAvatar();
+    }
+  });
+
+  // 点击遮罩关闭
+  document.addEventListener('click', function(e) {
+    if (!isExpanded) return;
+    if (card.contains(e.target)) return;
+    if (avatarSmall.contains(e.target)) return;
+    animateCardToAvatar();
   });
 })();
 </script>
