@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/SearchBox.astro';
+import NoteCard from '../components/NoteCard.astro';
+import CategoryCard from '../components/CategoryCard.astro';
+
+const allNotes = await getCollection('notes');
+const notes = allNotes.filter(n => !n.data.draft).sort((a, b) => 
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const recentNotes = notes.slice(0, 6);
+
+// 分类统计
+const categoryMap = new Map<string, number>();
+notes.forEach(n => {
+  const c = n.data.category;
+  categoryMap.set(c, (categoryMap.get(c) || 0) + 1);
+});
+const categories = Array.from(categoryMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6);
+
+// 标签统计
+const tagMap = new Map<string, number>();
+notes.forEach(n => {
+  n.data.tags.forEach(t => {
+    tagMap.set(t, (tagMap.get(t) || 0) + 1);
+  });
+});
+const topTags = Array.from(tagMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 8);
+---
+<BaseLayout title="ZeroOne Notes" current="home">
+  <!-- Hero Section -->
+  <section class="relative pt-16 pb-12 sm:pt-24 sm:pb-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-text-main mb-4 tracking-tight animate-fade-in-up">
+        把零散知识点，<br class="sm:hidden"/>整理成自己的系统。
+      </h1>
+      <p class="text-text-secondary text-base sm:text-lg mb-8 max-w-2xl mx-auto animate-fade-in-up" style="animation-delay: 0.1s">
+        一个工程师的个人知识库，记录嵌入式、通信协议、RTOS 与开发工具的学习笔记。
+      </p>
+      <div class="animate-fade-in-up" style="animation-delay: 0.2s">
+        <SearchBox />
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="py-8 sm:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-text-main">知识分类</h2>
+        <a href="/categories" class="text-sm text-primary hover:underline">查看全部 →</a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+        {categories.map(([name, count]) => (
+          <CategoryCard name={name} count={count} href={`/categories/${encodeURIComponent(name)}/`} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Notes -->
+  <section class="py-8 sm:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-text-main">最近记录</h2>
+        <a href="/notes" class="text-sm text-primary hover:underline">查看全部 →</a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {recentNotes.map(note => (
+          <NoteCard 
+            title={note.data.title}
+            summary={note.data.summary}
+            category={note.data.category}
+            tags={note.data.tags}
+            date={note.data.date}
+            slug={note.slug}
+            favorite={note.data.favorite}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tags -->
+  <section class="py-8 sm:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-text-main">热门标签</h2>
+        <a href="/tags" class="text-sm text-primary hover:underline">查看全部 →</a>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {topTags.map(([name, count]) => (
+          <a 
+            href={`/tags/${encodeURIComponent(name)}/`}
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-white/5 border border-white/10 text-text-secondary hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all"
+          >
+            <span>#{name}</span>
+            <span class="text-xs text-text-weak">{count}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-8 sm:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="glass-card p-6 sm:p-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-primary">{notes.length}</div>
+            <div class="text-sm text-text-secondary mt-1">笔记总数</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-primary">{categories.length}</div>
+            <div class="text-sm text-text-secondary mt-1">知识分类</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-primary">{tagMap.size}</div>
+            <div class="text-sm text-text-secondary mt-1">标签数量</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-primary">{notes.filter(n => n.data.favorite).length}</div>
+            <div class="text-sm text-text-secondary mt-1">收藏笔记</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

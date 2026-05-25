@@ -1,0 +1,319 @@
+/* ========== CSS 变量 ========== */
+:root {
+  --page-bg: #0B0F19;
+  --page-bg-light: #0B0F19;
+  --text-main: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --text-weak: #6B7280;
+  --primary: #10A37F;
+  --secondary: #7C3AED;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.10);
+  --binary-color: rgba(255, 255, 255, 0.38);
+}
+
+html.light {
+  --page-bg: #F7F7F8;
+  --page-bg-light: #F7F7F8;
+  --text-main: #111827;
+  --text-secondary: #6B7280;
+  --text-weak: #9CA3AF;
+  --primary: #10A37F;
+  --secondary: #7C3AED;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(17, 24, 39, 0.08);
+  --binary-color: rgba(16, 163, 127, 0.35);
+}
+
+/* ========== 全局基础 ========== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--page-bg);
+  color: var(--text-main);
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ========== 滚动条 ========== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(128,128,128,0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128,128,128,0.35);
+}
+
+/* ========== 选中效果 ========== */
+::selection {
+  background: rgba(16, 163, 127, 0.3);
+  color: inherit;
+}
+
+/* ========== CRT 覆盖效果 ========== */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.06) 0px,
+    rgba(0,0,0,0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.crt-curve {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0,0,0,0.4) 95%,
+    rgba(0,0,0,0.7) 100%
+  );
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.5);
+}
+
+.crt-flicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,255,65,0.015);
+  animation: flicker 0.15s infinite;
+  opacity: 0.3;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.25; }
+}
+
+/* ========== 开机画面 ========== */
+.boot-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+}
+
+.boot-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-text {
+  color: #00ff41;
+  font-size: 14px;
+  line-height: 2;
+  text-shadow: 0 0 8px rgba(0,255,65,0.4);
+  font-family: 'Courier New', 'Consolas', monospace;
+}
+
+.boot-line {
+  opacity: 0;
+  animation: type-in 0.3s forwards;
+}
+
+.blink {
+  animation: type-in 0.3s forwards, blink-cursor 1s infinite;
+}
+
+@keyframes type-in {
+  to { opacity: 1; }
+}
+
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* ========== 代码块样式 ========== */
+pre {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
+}
+
+:not(pre) > code {
+  background: rgba(16, 163, 127, 0.12);
+  color: #10A37F;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+html.light pre {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+html.light :not(pre) > code {
+  background: rgba(16, 163, 127, 0.1);
+  color: #0d8f6e;
+}
+
+/* ========== 文章正文样式 ========== */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.6em;
+  line-height: 1.3;
+}
+
+.prose h1 {
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+.prose h2 {
+  font-size: 1.4rem;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 0.3em;
+}
+
+.prose h3 {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+}
+
+.prose p {
+  margin-bottom: 1em;
+  line-height: 1.8;
+}
+
+.prose ul, .prose ol {
+  margin: 1em 0;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.4em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.prose th, .prose td {
+  border: 1px solid var(--card-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--card-bg);
+  font-weight: 600;
+}
+
+/* ========== 卡片玻璃拟态 ========== */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: var(--card-bg);
+  border-color: rgba(128, 128, 128, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+/* ========== 动画 ========== */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease forwards;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+  .boot-text {
+    font-size: 11px;
+    padding: 0 20px;
+  }
+  
+  .crt-overlay {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .crt-flicker {
+    animation: none;
+  }
+}

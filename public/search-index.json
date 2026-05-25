@@ -1,0 +1,42 @@
+[
+  {
+    "title": "FreeRTOS 上下文切换",
+    "slug": "freertos-context-switch",
+    "summary": "记录 FreeRTOS 中任务切换的核心流程和面试表达方式。",
+    "category": "FreeRTOS",
+    "tags": ["FreeRTOS", "PendSV", "任务调度", "上下文切换"],
+    "date": "2026-05-25"
+  },
+  {
+    "title": "IIC 上拉电阻对速率的影响",
+    "slug": "iic-pullup-resistor",
+    "summary": "分析 IIC 总线上拉电阻阻值选择与通信速率的关系。",
+    "category": "通信协议",
+    "tags": ["IIC", "硬件", "通信协议", "上拉电阻"],
+    "date": "2026-05-22"
+  },
+  {
+    "title": "LVGL 下拉列表样式自定义",
+    "slug": "lvgl-dropdown-style",
+    "summary": "LVGL v8 中下拉列表（dropdown）各部分的样式修改方法。",
+    "category": "LVGL",
+    "tags": ["LVGL", "UI", "嵌入式", "样式"],
+    "date": "2026-05-18"
+  },
+  {
+    "title": "CAN 协议基础",
+    "slug": "can-protocol-basic",
+    "summary": "CAN 总线的数据帧结构、仲裁机制和错误处理。",
+    "category": "通信协议",
+    "tags": ["CAN", "通信协议", "汽车电子", "总线"],
+    "date": "2026-05-15"
+  },
+  {
+    "title": "ESP32-S3 Flash 与 RAM 布局",
+    "slug": "esp32-s3-flash-ram",
+    "summary": "理解 ESP32-S3 的内存映射、Flash 分区和 RAM 使用优化。",
+    "category": "ESP32",
+    "tags": ["ESP32", "内存", "Flash", "嵌入式"],
+    "date": "2026-05-10"
+  }
+]

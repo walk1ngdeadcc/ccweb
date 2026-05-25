@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="关于 | ZeroOne Notes" current="about">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="glass-card p-6 sm:p-10">
+      <div class="flex items-center gap-5 mb-8">
+        <div class="text-6xl">🧑‍💻</div>
+        <div>
+          <h1 class="text-2xl font-bold text-text-main">ZeroOne Notes</h1>
+          <p class="text-text-secondary">嵌入式工程师 / 技术写作者</p>
+        </div>
+      </div>
+      
+      <div class="prose max-w-none">
+        <h2>关于这个知识库</h2>
+        <p>
+          这是一个面向个人学习记录的静态知识库网站，用于保存、展示和检索日常学习到的知识点、技术笔记、面试总结、代码片段和项目经验。
+        </p>
+        <p>
+          所有笔记以 Markdown 文件形式保存在 Git 仓库中，通过 Astro 静态站点框架在构建时生成网页。用户本地编写 Markdown 笔记，提交到 GitHub 后，部署平台自动重新构建并上线。
+        </p>
+        
+        <h2>学习方向</h2>
+        <ul>
+          <li><strong>嵌入式系统</strong>：FreeRTOS、ESP32、STM32、驱动开发</li>
+          <li><strong>通信协议</strong>：IIC、SPI、UART、CAN、RS485</li>
+          <li><strong>UI 框架</strong>：LVGL 嵌入式图形库</li>
+          <li><strong>工具链</strong>：Makefile、CMake、Git、调试技巧</li>
+          <li><strong>面试准备</strong>：操作系统、数据结构、硬件基础</li>
+        </ul>
+        
+        <h2>技术栈</h2>
+        <p>
+          本网站使用 <code>Astro</code> + <code>TypeScript</code> + <code>TailwindCSS</code> 构建，部署在 Cloudflare Pages 上。
+        </p>
+        <p>
+          视觉风格融合了像素桌面游戏的 CRT 效果和 ChatGPT 官网的简洁科技感，背景加入鼠标交互的 0/1 二进制透镜特效。
+        </p>
+        
+        <h2>写作模板</h2>
+        <p>每篇笔记遵循统一的 Markdown 模板结构：</p>
+        <ul>
+          <li><strong>一句话总结</strong>：用最简短的话概括核心概念</li>
+          <li><strong>核心流程</strong>：步骤化的知识拆解</li>
+          <li><strong>代码示例</strong>：可直接运行的关键代码</li>
+          <li><strong>面试回答</strong>：面向技术面试的表达方式</li>
+          <li><strong>常见问题</strong>：排查过程和易错点</li>
+        </ul>
+        
+        <blockquote>
+          把零散知识点，整理成自己的系统。
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import SearchBox from '../../components/SearchBox.astro';
+
+const allNotes = await getCollection('notes');
+const notes = allNotes.filter(n => !n.data.draft).sort((a, b) => 
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+// 分类筛选
+const categoryMap = new Map<string, number>();
+notes.forEach(n => {
+  const c = n.data.category;
+  categoryMap.set(c, (categoryMap.get(c) || 0) + 1);
+});
+const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
+
+// 标签筛选
+const tagMap = new Map<string, number>();
+notes.forEach(n => {
+  n.data.tags.forEach(t => {
+    tagMap.set(t, (tagMap.get(t) || 0) + 1);
+  });
+});
+const tags = Array.from(tagMap.entries()).sort((a, b) => b[1] - a[1]);
+---
+<BaseLayout title="笔记列表 | ZeroOne Notes" current="notes">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="text-center mb-8 sm:mb-10">
+      <h1 class="text-2xl sm:text-3xl font-bold text-text-main mb-3">全部笔记</h1>
+      <p class="text-text-secondary text-sm mb-6">共 {notes.length} 篇学习记录</p>
+      <SearchBox />
+    </div>
+    
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <a href="/notes" class="px-3 py-1.5 rounded-full text-sm bg-primary/10 text-primary border border-primary/20 font-medium">全部</a>
+      {categories.map(([name, count]) => (
+        <a 
+          href={`/categories/${encodeURIComponent(name)}/`}
+          class="px-3 py-1.5 rounded-full text-sm bg-white/5 border border-white/10 text-text-secondary hover:text-primary hover:border-primary/30 transition-all"
+        >
+          {name} ({count})
+        </a>
+      ))}
+    </div>
+    
+    <!-- Tag filters -->
+    <div class="flex flex-wrap gap-2 mb-8 pb-6 border-b border-white/5">
+      {tags.map(([name, count]) => (
+        <a 
+          href={`/tags/${encodeURIComponent(name)}/`}
+          class="text-xs text-text-weak hover:text-primary transition-colors"
+        >
+          #{name} ({count})
+        </a>
+      ))}
+    </div>
+    
+    <!-- Note Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      {notes.map(note => (
+        <NoteCard 
+          title={note.data.title}
+          summary={note.data.summary}
+          category={note.data.category}
+          tags={note.data.tags}
+          date={note.data.date}
+          slug={note.slug}
+          favorite={note.data.favorite}
+        />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,119 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.filter(n => !n.data.draft).map(note => ({
+    params: { slug: note.slug },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await note.render();
+
+// 相关笔记：同分类
+const allNotes = await getCollection('notes');
+const related = allNotes
+  .filter(n => !n.data.draft && n.slug !== note.slug && n.data.category === note.data.category)
+  .slice(0, 3);
+---
+<BaseLayout title={`${note.data.title} | ZeroOne Notes`} description={note.data.summary}>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Main Content -->
+      <article class="lg:col-span-8">
+        <div class="mb-6">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <a 
+              href={`/categories/${encodeURIComponent(note.data.category)}/`}
+              class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
+            >
+              {note.data.category}
+            </a>
+            {note.data.favorite && (
+              <span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 font-medium">★ 收藏</span>
+            )}
+            {note.data.difficulty && (
+              <span class="text-xs px-2.5 py-1 rounded-full bg-white/5 text-text-weak">{note.data.difficulty}</span>
+            )}
+          </div>
+          
+          <h1 class="text-2xl sm:text-3xl font-bold text-text-main mb-3">{note.data.title}</h1>
+          
+          <div class="flex flex-wrap items-center gap-3 text-sm text-text-weak">
+            <span>{note.data.date}</span>
+            {note.data.updated && (
+              <span>更新于 {note.data.updated}</span>
+            )}
+          </div>
+        </div>
+        
+        <div class="glass-card p-6 sm:p-8">
+          <div class="prose max-w-none">
+            <Content />
+          </div>
+        </div>
+        
+        <!-- Tags -->
+        <div class="mt-6 flex flex-wrap gap-2">
+          {note.data.tags.map(tag => (
+            <a 
+              href={`/tags/${encodeURIComponent(tag)}/`}
+              class="text-sm text-text-secondary hover:text-primary transition-colors"
+            >
+              #{tag}
+            </a>
+          ))}
+        </div>
+      </article>
+      
+      <!-- Sidebar -->
+      <aside class="lg:col-span-4 space-y-6">
+        <!-- Info Card -->
+        <div class="glass-card p-5">
+          <h3 class="text-sm font-semibold text-text-main mb-3">笔记信息</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-text-weak">分类</span>
+              <a href={`/categories/${encodeURIComponent(note.data.category)}/`} class="text-primary hover:underline">{note.data.category}</a>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-text-weak">日期</span>
+              <span class="text-text-secondary">{note.data.date}</span>
+            </div>
+            {note.data.updated && (
+              <div class="flex justify-between">
+                <span class="text-text-weak">更新</span>
+                <span class="text-text-secondary">{note.data.updated}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <!-- Related Notes -->
+        {related.length > 0 && (
+          <div class="glass-card p-5">
+            <h3 class="text-sm font-semibold text-text-main mb-3">相关笔记</h3>
+            <div class="space-y-3">
+              {related.map(r => (
+                <a href={`/notes/${r.slug}/`} class="block group">
+                  <div class="text-sm font-medium text-text-secondary group-hover:text-primary transition-colors line-clamp-1">
+                    {r.data.title}
+                  </div>
+                  <div class="text-xs text-text-weak mt-0.5">{r.data.date}</div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <!-- Navigation -->
+        <div class="glass-card p-5">
+          <a href="/notes" class="text-sm text-primary hover:underline">← 返回笔记列表</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

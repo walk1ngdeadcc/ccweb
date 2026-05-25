@@ -1,0 +1,108 @@
+---
+---
+<div class="relative w-full max-w-xl mx-auto" id="searchContainer">
+  <div class="relative">
+    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-weak pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <input 
+      type="text"
+      id="searchInput"
+      placeholder="搜索知识点 / 标签 / 关键词..."
+      class="w-full h-12 pl-12 pr-4 rounded-2xl bg-card-bg border border-card-border text-text-main placeholder:text-text-weak focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-sm"
+    />
+  </div>
+  
+  <!-- 搜索结果面板 -->
+  <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 rounded-2xl bg-page-bg/95 backdrop-blur-xl border border-white/10 shadow-2xl hidden overflow-hidden z-50 max-h-80 overflow-y-auto">
+    <div id="searchResultsList" class="p-2"></div>
+    <div id="searchEmpty" class="hidden p-6 text-center text-text-weak text-sm">
+      未找到匹配的笔记
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+  const searchResultsList = document.getElementById('searchResultsList');
+  const searchEmpty = document.getElementById('searchEmpty');
+  const searchContainer = document.getElementById('searchContainer');
+  
+  let searchIndex: any[] = [];
+  
+  // 加载搜索索引
+  fetch('/search-index.json')
+    .then(r => r.json())
+    .then(data => { searchIndex = data; })
+    .catch(() => { searchIndex = []; });
+  
+  function highlight(text: string, query: string): string {
+    if (!query) return text;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(regex, '<mark class="bg-primary/30 text-primary rounded px-0.5">$1</mark>');
+  }
+  
+  function performSearch(query: string) {
+    if (!query.trim()) {
+      searchResults?.classList.add('hidden');
+      return;
+    }
+    
+    const q = query.toLowerCase();
+    const matches = searchIndex.filter((note: any) => {
+      return (
+        (note.title || '').toLowerCase().includes(q) ||
+        (note.summary || '').toLowerCase().includes(q) ||
+        (note.category || '').toLowerCase().includes(q) ||
+        (note.tags || []).some((t: string) => t.toLowerCase().includes(q))
+      );
+    }).slice(0, 8);
+    
+    if (!searchResultsList || !searchEmpty) return;
+    
+    if (matches.length === 0) {
+      searchResultsList.innerHTML = '';
+      searchEmpty.classList.remove('hidden');
+    } else {
+      searchEmpty.classList.add('hidden');
+      searchResultsList.innerHTML = matches.map((note: any) => `
+        <a href="/notes/${note.slug}/" class="flex flex-col gap-1 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+          <div class="text-sm font-medium text-text-main group-hover:text-primary transition-colors">${highlight(note.title, q)}</div>
+          <div class="text-xs text-text-weak line-clamp-1">${highlight(note.summary || '', q)}</div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">${note.category}</span>
+            ${(note.tags || []).slice(0, 3).map((t: string) => `<span class="text-xs text-text-weak">#${t}</span>`).join('')}
+          </div>
+        </a>
+      `).join('');
+    }
+    
+    searchResults?.classList.remove('hidden');
+  }
+  
+  let debounceTimer: any;
+  searchInput?.addEventListener('input', (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      performSearch((e.target as HTMLInputElement).value);
+    }, 150);
+  });
+  
+  // 点击外部关闭
+  document.addEventListener('click', (e) => {
+    if (!searchContainer?.contains(e.target as Node)) {
+      searchResults?.classList.add('hidden');
+    }
+  });
+  
+  // ESC 关闭
+  searchInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchResults?.classList.add('hidden');
+      (e.target as HTMLInputElement).blur();
+    }
+  });
+})();
+</script>

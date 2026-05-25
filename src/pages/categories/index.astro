@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryCard from '../../components/CategoryCard.astro';
+
+const allNotes = await getCollection('notes');
+const notes = allNotes.filter(n => !n.data.draft);
+
+const categoryMap = new Map<string, number>();
+notes.forEach(n => {
+  const c = n.data.category;
+  categoryMap.set(c, (categoryMap.get(c) || 0) + 1);
+});
+
+const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
+---
+<BaseLayout title="分类浏览 | ZeroOne Notes" current="categories">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="text-center mb-8 sm:mb-10">
+      <h1 class="text-2xl sm:text-3xl font-bold text-text-main mb-3">知识分类</h1>
+      <p class="text-text-secondary text-sm">共 {categories.length} 个分类，{notes.length} 篇笔记</p>
+    </div>
+    
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {categories.map(([name, count]) => (
+        <CategoryCard name={name} count={count} href={`/categories/${encodeURIComponent(name)}/`} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

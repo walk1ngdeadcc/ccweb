@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allNotes = await getCollection('notes');
+const notes = allNotes.filter(n => !n.data.draft).sort((a, b) => 
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+// 按年月分组
+const grouped = new Map<string, typeof notes>();
+notes.forEach(note => {
+  const d = new Date(note.data.date);
+  const key = `${d.getFullYear()}年${String(d.getMonth() + 1).padStart(2, '0')}月`;
+  if (!grouped.has(key)) grouped.set(key, []);
+  grouped.get(key)!.push(note);
+});
+---
+<BaseLayout title="时间归档 | ZeroOne Notes" current="archive">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="text-center mb-8 sm:mb-10">
+      <h1 class="text-2xl sm:text-3xl font-bold text-text-main mb-3">时间归档</h1>
+      <p class="text-text-secondary text-sm">按时间线查看全部 {notes.length} 篇笔记</p>
+    </div>
+    
+    <div class="space-y-8">
+      {Array.from(grouped.entries()).map(([month, items]) => (
+        <div>
+          <h2 class="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary"></span>
+            {month}
+            <span class="text-sm text-text-weak font-normal">({items.length} 篇)</span>
+          </h2>
+          <div class="space-y-2">
+            {items.map(note => (
+              <a 
+                href={`/notes/${note.slug}/`}
+                class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors group"
+              >
+                <span class="text-sm text-text-weak w-16 flex-shrink-0">{note.data.date}</span>
+                <span class="text-sm text-text-secondary group-hover:text-primary transition-colors line-clamp-1">
+                  {note.data.title}
+                </span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary ml-auto flex-shrink-0 hidden sm:inline-block">
+                  {note.data.category}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

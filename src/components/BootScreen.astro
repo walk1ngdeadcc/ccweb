@@ -1,0 +1,49 @@
+---
+---
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-text">
+    <div class="boot-line">BIOS DATE 05/20/25 14:22:51 VER 1.0.4</div>
+    <div class="boot-line">CPU: Pixel-Engine x64 @ 3.6GHz</div>
+    <div class="boot-line">RAM: 640K OK</div>
+    <div class="boot-line">GPU: CRT-Shader 2.0</div>
+    <div class="boot-line">ZEROONE KB v1.0 INITIALIZED</div>
+    <div class="boot-line">Loading knowledge modules...</div>
+    <div class="boot-line">[OK] Markdown parser</div>
+    <div class="boot-line">[OK] Search indexer</div>
+    <div class="boot-line">[OK] Category tree</div>
+    <div class="boot-line">[OK] Tag cloud</div>
+    <div class="boot-line blink">正在加载桌面环境...</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const bootScreen = document.getElementById('bootScreen');
+  if (!bootScreen) return;
+
+  // 检查是否在本会话中已经显示过开机动画
+  const hasBooted = sessionStorage.getItem('zeroone_booted');
+
+  if (hasBooted) {
+    // 已经看过，直接移除
+    bootScreen.style.display = 'none';
+    return;
+  }
+
+  // 标记已启动
+  sessionStorage.setItem('zeroone_booted', '1');
+
+  const lines = bootScreen.querySelectorAll('.boot-line');
+  lines.forEach((line, i) => {
+    line.style.animationDelay = `${i * 0.35}s`;
+  });
+
+  const totalDelay = lines.length * 350 + 1200;
+  setTimeout(() => {
+    bootScreen.classList.add('hidden');
+    setTimeout(() => {
+      bootScreen.style.display = 'none';
+    }, 800);
+  }, totalDelay);
+})();
+</script>

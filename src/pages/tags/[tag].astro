@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NoteCard from '../../components/NoteCard.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  const tagMap = new Map<string, typeof notes>();
+  
+  notes.filter(n => !n.data.draft).forEach(note => {
+    note.data.tags.forEach(tag => {
+      if (!tagMap.has(tag)) tagMap.set(tag, []);
+      tagMap.get(tag)!.push(note);
+    });
+  });
+  
+  return Array.from(tagMap.entries()).map(([tag, notes]) => ({
+    params: { tag },
+    props: { tag, notes: notes.sort((a, b) => 
+      new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+    )},
+  }));
+}
+
+const { tag, notes } = Astro.props;
+---
+<BaseLayout title={`#${tag} | ZeroOne Notes`} current="tags">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="mb-8">
+      <a href="/tags" class="text-sm text-primary hover:underline mb-2 inline-block">← 全部标签</a>
+      <h1 class="text-2xl sm:text-3xl font-bold text-text-main">#{tag}</h1>
+      <p class="text-text-secondary text-sm mt-1">共 {notes.length} 篇笔记</p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      {notes.map(note => (
+        <NoteCard 
+          title={note.data.title}
+          summary={note.data.summary}
+          category={note.data.category}
+          tags={note.data.tags}
+          date={note.data.date}
+          slug={note.slug}
+          favorite={note.data.favorite}
+        />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

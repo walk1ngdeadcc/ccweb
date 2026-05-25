@@ -1,0 +1,138 @@
+---
+interface Props {
+  current?: string;
+}
+
+const { current } = Astro.props;
+
+const navItems = [
+  { href: '/', label: '首页', id: 'home' },
+  { href: '/notes', label: '笔记', id: 'notes' },
+  { href: '/categories', label: '分类', id: 'categories' },
+  { href: '/tags', label: '标签', id: 'tags' },
+  { href: '/archive', label: '归档', id: 'archive' },
+  { href: '/favorites', label: '收藏', id: 'favorites' },
+  { href: '/about', label: '关于', id: 'about' },
+];
+---
+<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="siteHeader">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-14 sm:h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 text-primary font-bold text-lg tracking-tight hover:opacity-80 transition-opacity">
+        <span class="text-xl">🧑‍💻</span>
+        <span class="hidden sm:inline">ZeroOne Notes</span>
+      </a>
+      
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1">
+        {navItems.map(item => (
+          <a 
+            href={item.href}
+            class={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+              current === item.id 
+                ? 'text-primary bg-primary/10 font-medium' 
+                : 'text-text-secondary hover:text-text-main hover:bg-white/5'
+            }`}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+      
+      <!-- Right side -->
+      <div class="flex items-center gap-2">
+        <button 
+          id="themeToggle"
+          class="w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-main hover:bg-white/5 transition-all"
+          aria-label="切换主题"
+        >
+          <svg class="w-5 h-5 hidden" id="sunIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <svg class="w-5 h-5" id="moonIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        
+        <!-- Mobile menu button -->
+        <button 
+          id="mobileMenuBtn"
+          class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-main hover:bg-white/5 transition-all"
+          aria-label="菜单"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mobile Nav -->
+  <div id="mobileMenu" class="md:hidden hidden border-t border-white/5 bg-page-bg/95 backdrop-blur-xl">
+    <nav class="max-w-6xl mx-auto px-4 py-2 flex flex-col">
+      {navItems.map(item => (
+        <a 
+          href={item.href}
+          class={`px-3 py-2.5 rounded-lg text-sm transition-all ${
+            current === item.id 
+              ? 'text-primary bg-primary/10 font-medium' 
+              : 'text-text-secondary hover:text-text-main hover:bg-white/5'
+          }`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+(function() {
+  // 主题切换
+  const themeToggle = document.getElementById('themeToggle');
+  const sunIcon = document.getElementById('sunIcon');
+  const moonIcon = document.getElementById('moonIcon');
+  const html = document.documentElement;
+  
+  function updateThemeIcons() {
+    const isLight = html.classList.contains('light');
+    if (sunIcon && moonIcon) {
+      sunIcon.classList.toggle('hidden', !isLight);
+      moonIcon.classList.toggle('hidden', isLight);
+    }
+  }
+  
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    html.classList.add('light');
+  }
+  updateThemeIcons();
+  
+  themeToggle?.addEventListener('click', () => {
+    html.classList.toggle('light');
+    const isLight = html.classList.contains('light');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeIcons();
+  });
+  
+  // 移动菜单
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+  
+  // 滚动时头部样式
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 10) {
+      header?.classList.add('bg-page-bg/80', 'backdrop-blur-xl', 'border-b', 'border-white/5');
+    } else {
+      header?.classList.remove('bg-page-bg/80', 'backdrop-blur-xl', 'border-b', 'border-white/5');
+    }
+  });
+})();
+</script>

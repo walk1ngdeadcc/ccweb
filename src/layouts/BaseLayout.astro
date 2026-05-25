@@ -1,0 +1,48 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BootScreen from '../components/BootScreen.astro';
+import BinaryBackground from '../components/BinaryBackground.astro';
+import CRTEffect from '../components/CRTEffect.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  current?: string;
+}
+
+const { 
+  title = 'ZeroOne Notes', 
+  description = '把零散知识点，整理成自己的系统',
+  current 
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧑‍💻</text></svg>">
+  <link rel="stylesheet" href="/styles/global.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <BootScreen />
+  <BinaryBackground />
+  <CRTEffect />
+  
+  <div class="relative z-10 min-h-screen flex flex-col">
+    <Header current={current} />
+    
+    <main class="flex-1 pt-16 sm:pt-20">
+      <slot />
+    </main>
+    
+    <Footer />
+  </div>
+</body>
+</html>

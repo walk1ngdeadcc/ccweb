@@ -1,0 +1,126 @@
+---
+---
+<canvas id="binaryCanvas" class="fixed inset-0 w-full h-full pointer-events-none" style="z-index: 1;"></canvas>
+
+<script>
+(function() {
+  const canvas = document.getElementById('binaryCanvas');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let mouseX = -1000;
+  let mouseY = -1000;
+  let isVisible = false;
+  let fadeOpacity = 0;
+  let lastUpdate = 0;
+  let gridValues: number[][] = [];
+  
+  const GRID_SIZE = 20;
+  const RADIUS = 140;
+  const UPDATE_INTERVAL = 200;
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initGrid();
+  }
+  
+  function initGrid() {
+    const cols = Math.ceil(canvas.width / GRID_SIZE) + 1;
+    const rows = Math.ceil(canvas.height / GRID_SIZE) + 1;
+    gridValues = [];
+    for (let r = 0; r < rows; r++) {
+      const row: number[] = [];
+      for (let c = 0; c < cols; c++) {
+        row.push(Math.random() > 0.5 ? 1 : 0);
+      }
+      gridValues.push(row);
+    }
+  }
+  
+  function updateGrid() {
+    const now = Date.now();
+    if (now - lastUpdate < UPDATE_INTERVAL) return;
+    lastUpdate = now;
+    
+    for (let r = 0; r < gridValues.length; r++) {
+      for (let c = 0; c < gridValues[r].length; c++) {
+        if (Math.random() > 0.7) {
+          gridValues[r][c] = Math.random() > 0.5 ? 1 : 0;
+        }
+      }
+    }
+  }
+  
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (!isVisible && fadeOpacity <= 0.01) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    
+    // 淡入淡出
+    if (isVisible) {
+      fadeOpacity = Math.min(1, fadeOpacity + 0.05);
+    } else {
+      fadeOpacity = Math.max(0, fadeOpacity - 0.03);
+    }
+    
+    if (fadeOpacity <= 0) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    
+    updateGrid();
+    
+    ctx.font = '12px "JetBrains Mono", "Fira Code", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    const isLight = document.documentElement.classList.contains('light');
+    const baseColor = isLight ? '16, 163, 127' : '255, 255, 255';
+    
+    for (let r = 0; r < gridValues.length; r++) {
+      for (let c = 0; c < gridValues[r].length; c++) {
+        const x = c * GRID_SIZE + GRID_SIZE / 2;
+        const y = r * GRID_SIZE + GRID_SIZE / 2;
+        const dist = Math.hypot(x - mouseX, y - mouseY);
+        
+        if (dist < RADIUS) {
+          const fade = 1 - (dist / RADIUS);
+          const alpha = fade * fadeOpacity * (isLight ? 0.35 : 0.38);
+          ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
+          ctx.fillText(gridValues[r][c].toString(), x, y);
+        }
+      }
+    }
+    
+    requestAnimationFrame(draw);
+  }
+  
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    isVisible = true;
+  });
+  
+  window.addEventListener('mouseleave', () => {
+    isVisible = false;
+  });
+  
+  window.addEventListener('resize', resize);
+  
+  // 页面不可见时暂停
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isVisible = false;
+    }
+  });
+  
+  resize();
+  requestAnimationFrame(draw);
+})();
+</script>

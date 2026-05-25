@@ -1,0 +1,17 @@
+---
+interface Props {
+  name: string;
+  count: number;
+  href: string;
+}
+
+const { name, count, href } = Astro.props;
+---
+<a href={href} class="glass-card flex flex-col items-center justify-center p-6 text-center group min-h-[120px]">
+  <div class="text-lg font-semibold text-text-main group-hover:text-primary transition-colors mb-1">
+    {name}
+  </div>
+  <div class="text-sm text-text-secondary">
+    {count} 篇
+  </div>
+</a>
