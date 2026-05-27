@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(node -e ' *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git submodule *)",
+      "Bash(git rm *)"
     ]
   }
 }

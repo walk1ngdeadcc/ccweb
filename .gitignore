@@ -27,3 +27,6 @@ pnpm-debug.log*
 # Backups
 pixel-desk-archive/
 pixel-desk-blog.zip
+
+# Claude Code worktrees
+.claude/worktrees/
